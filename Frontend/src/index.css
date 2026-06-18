@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-200 font-sans;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-slate-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-700 rounded-full; }
+
+  /* Table defaults */
+  table { @apply w-full border-collapse; }
+  th    { @apply text-left text-xs font-semibold uppercase tracking-wider text-slate-500 py-3 px-4; }
+  td    { @apply py-3 px-4 text-sm border-t border-slate-800; }
+}
+
+@layer components {
+  .card {
+    @apply bg-slate-900 border border-slate-800 rounded-xl;
+  }
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700
+           text-white font-semibold text-sm px-5 py-2.5 rounded-lg
+           transition-colors focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-indigo-400 focus-visible:ring-offset-2
+           focus-visible:ring-offset-slate-950 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply hover:bg-slate-800 active:bg-slate-700 text-slate-300
+           text-sm px-4 py-2 rounded-lg transition-colors;
+  }
+  .btn-danger {
+    @apply bg-red-950 hover:bg-red-900 border border-red-800
+           text-red-300 font-medium text-sm px-4 py-2 rounded-lg transition-colors;
+  }
+  .btn-success {
+    @apply bg-emerald-950 hover:bg-emerald-900 border border-emerald-800
+           text-emerald-300 font-medium text-sm px-4 py-2 rounded-lg transition-colors;
+  }
+  .input {
+    @apply bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5
+           text-slate-100 placeholder-slate-500 text-sm
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+           transition-shadow w-full;
+  }
+  .tab-active {
+    @apply text-slate-100 border-b-2 border-indigo-400 font-medium;
+  }
+  .tab-inactive {
+    @apply text-slate-500 hover:text-slate-300 border-b-2 border-transparent
+           transition-colors font-medium;
+  }
+}

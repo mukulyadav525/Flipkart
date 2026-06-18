@@ -1,0 +1,37 @@
+{
+  "total_today": 7,
+  "total_this_week": 31,
+  "pending_review": 4,
+  "counts_by_type": {
+    "helmet": 3,
+    "seatbelt": 1,
+    "triple_riding": 1,
+    "red_light": 1,
+    "stop_line": 1,
+    "wrong_side": 0,
+    "illegal_parking": 1
+  },
+  "severity_ranking": [
+    { "violation_type": "red_light",       "count": 1, "severity_weight": 3.0, "mean_confidence": 0.96, "severity_score": 2.88 },
+    { "violation_type": "wrong_side",      "count": 0, "severity_weight": 3.0, "mean_confidence": 0.0,  "severity_score": 0.0  },
+    { "violation_type": "stop_line",       "count": 1, "severity_weight": 2.0, "mean_confidence": 0.89, "severity_score": 1.78 },
+    { "violation_type": "triple_riding",   "count": 1, "severity_weight": 1.8, "mean_confidence": 0.88, "severity_score": 1.58 },
+    { "violation_type": "helmet",          "count": 3, "severity_weight": 1.5, "mean_confidence": 0.92, "severity_score": 4.13 },
+    { "violation_type": "seatbelt",        "count": 1, "severity_weight": 1.5, "mean_confidence": 0.87, "severity_score": 1.31 },
+    { "violation_type": "illegal_parking", "count": 1, "severity_weight": 1.0, "mean_confidence": 0.86, "severity_score": 0.86 }
+  ],
+  "repeat_offenders": [
+    {
+      "plate_text": "MH12AB1234",
+      "count": 3,
+      "violation_types": ["helmet", "seatbelt"],
+      "last_seen_timestamp": "2025-06-18T13:05:19+05:30"
+    }
+  ],
+  "tod_breakdown": {
+    "Night":     { "helmet": 0, "red_light": 0, "triple_riding": 0, "seatbelt": 0, "illegal_parking": 0, "stop_line": 0, "wrong_side": 1 },
+    "Morning":   { "helmet": 1, "red_light": 1, "triple_riding": 1, "seatbelt": 0, "illegal_parking": 0, "stop_line": 0, "wrong_side": 0 },
+    "Afternoon": { "helmet": 1, "red_light": 0, "triple_riding": 0, "seatbelt": 1, "illegal_parking": 1, "stop_line": 0, "wrong_side": 0 },
+    "Evening":   { "helmet": 0, "red_light": 0, "triple_riding": 0, "seatbelt": 0, "illegal_parking": 0, "stop_line": 1, "wrong_side": 0 }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "image_id": "frame_001",
+  "lane_direction_vector": { "x": 0.0, "y": -1.0 },
+  "stop_line_coords": [
+    { "x": 120.0, "y": 610.0 },
+    { "x": 980.0, "y": 610.0 }
+  ],
+  "signal_state": "red",
+  "no_parking_zone_polygon": [
+    { "x": 50.0,  "y": 400.0 },
+    { "x": 250.0, "y": 400.0 },
+    { "x": 250.0, "y": 700.0 },
+    { "x": 50.0,  "y": 700.0 }
+  ],
+  "no_parking_sign_visible": true
+}

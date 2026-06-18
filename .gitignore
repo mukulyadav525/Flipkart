@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.egg
+
+# Model weights (large binaries — download separately)
+Pipeline/weights/*.pt
+Pipeline/weights/*.pth
+
+# Pipeline runtime outputs (generated, not source)
+Pipeline/outputs/violation_records/*.jsonl
+Pipeline/outputs/human_review_queue.jsonl
+Pipeline/outputs/annotated_images/*.jpg
+Pipeline/outputs/annotated_images/*.png
+Pipeline/outputs/reports/*.csv
+Pipeline/outputs/reports/*.md
+Pipeline/outputs/latency_log.jsonl
+
+# Backend runtime
+Backend/data/audit_log.jsonl
+
+# Node / Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env
+Frontend/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+*.swp
+*.swo
