@@ -8,7 +8,7 @@ const ROLES: { value: UserRole; label: string; description: string }[] = [
   {
     value: 'citizen',
     label: 'Citizen',
-    description: 'Check your own vehicle's violation record and understand the evidence behind each notice.',
+    description: "Check your own vehicle's violation record and understand the evidence behind each notice.",
   },
   {
     value: 'police',

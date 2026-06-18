@@ -40,7 +40,7 @@ export const VIOLATION_META: Record<ViolationType, ViolationMeta> = {
     citizen: {
       heading: 'Helmet Not Detected',
       explanation:
-        'Our system identified a two-wheeler rider in this image without a helmet. The rider's head was visible in the frame, but no protective headgear was detected overlapping the head region.',
+        "Our system identified a two-wheeler rider in this image without a helmet. The rider's head was visible in the frame, but no protective headgear was detected overlapping the head region.",
       law: 'Motor Vehicles Act, 1988 — Section 129: Every person riding a motorised two-wheeler must wear a protective headgear conforming to prescribed standards.',
     },
   },
@@ -52,7 +52,7 @@ export const VIOLATION_META: Record<ViolationType, ViolationMeta> = {
     citizen: {
       heading: 'Seatbelt Not Detected',
       explanation:
-        'An occupant was visible through the vehicle's window, and the system's pose estimation identified the shoulder-to-hip region. No seatbelt strap was detected crossing the torso.',
+        "An occupant was visible through the vehicle's window, and the system's pose estimation identified the shoulder-to-hip region. No seatbelt strap was detected crossing the torso.",
       law: 'Motor Vehicles Act, 1988 — Section 138(3): Every occupant of a motor vehicle must wear a seatbelt while the vehicle is in motion.',
     },
   },
@@ -76,7 +76,7 @@ export const VIOLATION_META: Record<ViolationType, ViolationMeta> = {
     citizen: {
       heading: 'Wrong-Side Driving Detected',
       explanation:
-        'Your vehicle was detected travelling against the designated direction of traffic flow for the lane visible in the camera's field of view.',
+        "Your vehicle was detected travelling against the designated direction of traffic flow for the lane visible in the camera's field of view.",
       law: 'Central Motor Vehicles Rules, 1989 — Rule 15: No vehicle may be driven on the wrong side of the road.',
     },
   },
@@ -100,7 +100,7 @@ export const VIOLATION_META: Record<ViolationType, ViolationMeta> = {
     citizen: {
       heading: 'Red Light Violation',
       explanation:
-        'The vehicle crossed the stop line while the traffic signal was displaying red. The system confirmed both the signal state and the vehicle's position relative to the stop line.',
+        "The vehicle crossed the stop line while the traffic signal was displaying red. The system confirmed both the signal state and the vehicle's position relative to the stop line.",
       law: 'Motor Vehicles Act, 1988 — Section 119: Failing to stop at a red traffic signal is a punishable offence.',
     },
   },
@@ -112,7 +112,7 @@ export const VIOLATION_META: Record<ViolationType, ViolationMeta> = {
     citizen: {
       heading: 'Illegal Parking Detected',
       explanation:
-        'Your vehicle was detected stationary within a designated no-parking zone. Either a no-parking sign was visible in the frame, or the vehicle's position fell within a mapped no-parking boundary.',
+        "Your vehicle was detected stationary within a designated no-parking zone. Either a no-parking sign was visible in the frame, or the vehicle's position fell within a mapped no-parking boundary.",
       law: 'Central Motor Vehicles Rules, 1989 — Rule 15: Parking in a no-parking zone is prohibited.',
     },
   },
