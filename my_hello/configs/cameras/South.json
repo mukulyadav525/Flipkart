@@ -1,0 +1,19 @@
+{
+  "name": "South",
+  "frame_size": [1280, 720],
+  "no_parking": [
+    {
+      "name": "curb_right",
+      "polygon": [[820.0, 360.0], [1180.0, 360.0], [1220.0, 620.0], [780.0, 620.0]]
+    }
+  ],
+  "lanes": [
+    {
+      "name": "main_road",
+      "polygon": [[120.0, 430.0], [900.0, 430.0], [960.0, 680.0], [60.0, 680.0]],
+      "direction": [-1.0, 0.12]
+    }
+  ],
+  "stop_line": null,
+  "light_roi": null
+}

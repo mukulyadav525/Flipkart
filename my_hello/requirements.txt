@@ -1,0 +1,11 @@
+# Core pipeline (Phase 0)
+ultralytics>=8.3.0      # YOLO11 + built-in ByteTrack tracker
+opencv-python>=4.9.0
+numpy>=1.26
+
+# torch is pulled in by ultralytics. On Apple Silicon the default wheel ships
+# with MPS support, so no extra index is needed.
+
+# --- reserved for later phases ---
+# lap>=0.4               # faster ByteTrack assignment (optional)
+# paddleocr / easyocr    # Phase 4 ANPR
