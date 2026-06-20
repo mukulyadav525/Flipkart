@@ -15,6 +15,9 @@ env/
 # Model weights (large binaries — download separately)
 Pipeline/weights/*.pt
 Pipeline/weights/*.pth
+# Stray YOLO weights auto-downloaded into the Pipeline working dir at runtime
+Pipeline/*.pt
+Pipeline/*.pth
 
 # Pipeline runtime outputs (generated, not source)
 Pipeline/outputs/violation_records/*.jsonl
@@ -23,17 +26,18 @@ Pipeline/outputs/annotated_images/*.jpg
 Pipeline/outputs/annotated_images/*.png
 Pipeline/outputs/reports/*.csv
 Pipeline/outputs/reports/*.md
+Pipeline/outputs/reports/*.json
 Pipeline/outputs/latency_log.jsonl
 
-# my_hello generated outputs
-my_hello/outputs/
-my_hello/outputs1/
-my_hello/outputs2/
-my_hello/runs/
-my_hello/runs_helmet/
-my_hello/runs_helmet2/
-my_hello/.DS_Store
-my_hello/configs/.DS_Store
+# Gridlock engine generated outputs (merged under Pipeline/gridlock)
+Pipeline/gridlock/outputs/
+Pipeline/gridlock/outputs1/
+Pipeline/gridlock/outputs2/
+Pipeline/gridlock/runs/
+Pipeline/gridlock/runs_helmet/
+Pipeline/gridlock/runs_helmet2/
+Pipeline/gridlock/.DS_Store
+Pipeline/gridlock/configs/.DS_Store
 
 # Backend runtime
 Backend/data/audit_log.jsonl
