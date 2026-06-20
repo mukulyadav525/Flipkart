@@ -25,6 +25,16 @@ Pipeline/outputs/reports/*.csv
 Pipeline/outputs/reports/*.md
 Pipeline/outputs/latency_log.jsonl
 
+# my_hello generated outputs
+my_hello/outputs/
+my_hello/outputs1/
+my_hello/outputs2/
+my_hello/runs/
+my_hello/runs_helmet/
+my_hello/runs_helmet2/
+my_hello/.DS_Store
+my_hello/configs/.DS_Store
+
 # Backend runtime
 Backend/data/audit_log.jsonl
 
