@@ -1,0 +1,57 @@
+# ── Virtual environments ─────────────────────────────────────────────────────
+.venv/
+.venv-ml/
+venv/
+env/
+
+# ── Large dataset / video files ──────────────────────────────────────────────
+traffic-video-dataset/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# ── Model weights ─────────────────────────────────────────────────────────────
+*.pt
+*.pth
+*.onnx
+*.weights
+Pipeline/weights/
+
+# ── Python build artefacts ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Node / frontend build ─────────────────────────────────────────────────────
+node_modules/
+Frontend/dist/
+
+# ── OS / editor noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ── Secrets / env files ───────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Generated pipeline outputs (large / ephemeral) ───────────────────────────
+Pipeline/outputs/annotated_images/*.jpg
+Pipeline/outputs/annotated_images/*.png
+Pipeline/outputs/violation_records/confirmed.jsonl
+Pipeline/outputs/human_review_queue.jsonl
+Pipeline/outputs/latency_log.jsonl
+Pipeline/outputs/reports/*.json
+Pipeline/outputs/reports/*.csv
+
+# ── Test / coverage artefacts ─────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

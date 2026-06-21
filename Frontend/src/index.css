@@ -1,0 +1,351 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================================
+   TrafficEye — Skeuomorphic control-desk design system
+   Materials (brushed metal / leather / mahogany), real depth (layered inset +
+   outset shadows), CRT glass, physical buttons, rocker switches, analog dials,
+   paper challans, rubber ink stamps and polaroids.  Plain CSS — Tailwind only
+   handles layout.
+   ========================================================================= */
+
+:root {
+  /* Reusable fractal-noise grain (data-URI SVG) used as a material overlay. */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply text-stone-200 font-sans antialiased;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #20242c 0%, #0c0e12 60%, #06070a 100%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: #14161b; }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: linear-gradient(180deg, #4a4f59, #23262c);
+    border: 2px solid #14161b;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Grain overlay — add `.grain` to any material panel.
+   ------------------------------------------------------------------------- */
+.grain { position: relative; }
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: var(--noise);
+  opacity: 0.05; mix-blend-mode: overlay; border-radius: inherit;
+}
+
+/* =========================================================================
+   MATERIALS
+   ========================================================================= */
+
+/* Brushed steel — the Police "Radar Desk". */
+.brushed-metal {
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.045) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3a3f47 0%, #272b31 45%, #1c1f24 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -2px 6px rgba(0,0,0,.55),
+    0 18px 40px rgba(0,0,0,.55);
+  border: 1px solid #15171b;
+}
+
+/* Dark leather — the Citizen "Glovebox". */
+.leather {
+  background:
+    radial-gradient(120% 80% at 50% 0%, #6a4326 0%, #4a2f1b 55%, #2c1a0e 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(255,210,150,.10),
+    inset 0 -6px 22px rgba(0,0,0,.6),
+    0 24px 60px rgba(0,0,0,.6);
+  border: 1px solid #1c0f06;
+}
+/* Stitched seam for leather edges. */
+.stitched {
+  position: relative;
+  border: 1px solid rgba(0,0,0,.4);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.25);
+}
+.stitched::before {
+  content: ""; position: absolute; inset: 9px; border-radius: inherit;
+  border: 2px dashed rgba(226,196,140,.35); pointer-events: none;
+}
+
+/* Polished mahogany + brass — the Admin "Command Center". */
+.mahogany {
+  background:
+    repeating-linear-gradient(92deg, rgba(0,0,0,.12) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #4a271b 0%, #341a12 55%, #20100b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(214,160,90,.25),
+    inset 0 -8px 26px rgba(0,0,0,.6),
+    0 26px 64px rgba(0,0,0,.62);
+  border: 1px solid #160a06;
+}
+.brass-edge { border: 2px solid; border-image: linear-gradient(180deg, #f4d97b, #8a6d1b) 1; }
+
+/* Matte plastic chip / control housing. */
+.plastic {
+  background: linear-gradient(180deg, #2b2f36 0%, #1d2025 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 14px rgba(0,0,0,.45);
+  border: 1px solid #101216;
+}
+
+/* =========================================================================
+   DEPTH — raised vs recessed
+   ========================================================================= */
+.raised {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -2px 4px rgba(0,0,0,.4),
+    0 10px 22px rgba(0,0,0,.5);
+}
+.recessed {
+  box-shadow:
+    inset 0 3px 10px rgba(0,0,0,.7),
+    inset 0 -1px 0 rgba(255,255,255,.06);
+}
+/* Rivets in the four corners of a metal plate. */
+.riveted { position: relative; }
+.riveted::before, .riveted::after,
+.riveted > .rivet-tr, .riveted > .rivet-br { }
+.rivet {
+  position: absolute; width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c3c7cd, #4a4e55 60%, #1b1d21);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 1px 2px rgba(0,0,0,.7);
+}
+
+/* =========================================================================
+   CRT GLASS SCREEN
+   ========================================================================= */
+.crt {
+  position: relative; overflow: hidden; border-radius: 10px;
+  background:
+    radial-gradient(120% 120% at 50% 40%, #0c1f0c 0%, #061206 70%, #020602 100%);
+  box-shadow:
+    inset 0 0 60px rgba(0,0,0,.9),
+    inset 0 0 14px rgba(57,255,20,.12),
+    0 8px 22px rgba(0,0,0,.6);
+  border: 1px solid #0a140a;
+}
+.crt::before { /* scanlines */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.0) 0 2px, rgba(0,0,0,.22) 2px 4px);
+  animation: scan 6s linear infinite; background-size: 100% 6px;
+}
+.crt::after { /* glass curvature glare */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 50% at 50% 0%, rgba(255,255,255,.07), transparent 60%);
+}
+.crt-green { color: #7dff63; text-shadow: 0 0 6px rgba(57,255,20,.65); font-family: 'Share Tech Mono', monospace; }
+.crt-amber { color: #ffc24d; text-shadow: 0 0 6px rgba(255,176,0,.6);  font-family: 'Share Tech Mono', monospace; }
+
+/* =========================================================================
+   PHYSICAL BUTTONS
+   ========================================================================= */
+.btn-key {
+  font-family: 'Oswald', sans-serif; letter-spacing: .03em;
+  color: #e7e9ec; border-radius: 10px; padding: 10px 18px; border: 1px solid #0d0f12;
+  background: linear-gradient(180deg, #4b515b 0%, #2c3037 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -3px 6px rgba(0,0,0,.5),
+    0 6px 0 #15171b, 0 9px 16px rgba(0,0,0,.55);
+  transition: transform .06s ease, box-shadow .06s ease;
+  cursor: pointer; user-select: none;
+}
+.btn-key:active {
+  transform: translateY(5px);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.6), 0 1px 0 #15171b, 0 2px 6px rgba(0,0,0,.5);
+}
+.btn-key:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Illuminated chunky action buttons. */
+.btn-illum {
+  font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; border-radius: 12px; padding: 14px 20px;
+  cursor: pointer; user-select: none; border: 1px solid rgba(0,0,0,.5);
+  transition: transform .07s ease, box-shadow .07s ease, filter .2s ease;
+}
+.btn-illum:active { transform: translateY(4px); }
+.btn-illum:disabled { filter: grayscale(.6) brightness(.7); cursor: not-allowed; }
+.btn-illum-green {
+  color: #eafff0;
+  background: linear-gradient(180deg, #29c463 0%, #128a3e 60%, #0c5e2b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.4),
+    0 6px 0 #073d1c, 0 10px 22px rgba(20,200,90,.35), 0 0 26px rgba(35,220,110,.45);
+  text-shadow: 0 0 8px rgba(180,255,200,.8);
+}
+.btn-illum-green:active { box-shadow: inset 0 2px 8px rgba(0,0,0,.5), 0 2px 0 #073d1c, 0 0 18px rgba(35,220,110,.4); }
+.btn-illum-red {
+  color: #fff0f0;
+  background: linear-gradient(180deg, #e0463f 0%, #a01a1a 60%, #6e0f12 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45), inset 0 -4px 8px rgba(0,0,0,.4),
+    0 6px 0 #4a0a0c, 0 10px 22px rgba(210,40,40,.35), 0 0 26px rgba(230,60,60,.45);
+  text-shadow: 0 0 8px rgba(255,190,190,.8);
+}
+.btn-illum-red:active { box-shadow: inset 0 2px 8px rgba(0,0,0,.5), 0 2px 0 #4a0a0c, 0 0 18px rgba(230,60,60,.4); }
+
+/* Leather / brass buttons for citizen & admin. */
+.btn-brass {
+  font-family: 'Oswald', sans-serif; letter-spacing: .05em; text-transform: uppercase;
+  color: #2a1c08; border-radius: 8px; padding: 11px 20px; cursor: pointer;
+  background: linear-gradient(180deg, #f4d97b 0%, #c9a227 55%, #8a6d1b 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -3px 5px rgba(0,0,0,.35),
+    0 5px 0 #5e4a12, 0 9px 16px rgba(0,0,0,.5);
+  transition: transform .06s ease, box-shadow .06s ease; border: 1px solid #6e570f;
+}
+.btn-brass:active { transform: translateY(4px); box-shadow: inset 0 2px 5px rgba(0,0,0,.4), 0 1px 0 #5e4a12; }
+.btn-brass:disabled { opacity: .55; cursor: not-allowed; }
+
+/* =========================================================================
+   ROCKER TOGGLE SWITCH (violation filter switchboard)
+   ========================================================================= */
+.rocker {
+  position: relative; width: 56px; height: 28px; border-radius: 16px; cursor: pointer;
+  background: linear-gradient(180deg, #15171b, #25282e);
+  box-shadow: inset 0 3px 7px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
+  border: 1px solid #0a0b0d; flex: none; transition: background .2s ease;
+}
+.rocker > .knob {
+  position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d4d8de, #6a6e75 65%, #34373d);
+  box-shadow: 0 2px 4px rgba(0,0,0,.7), inset 0 1px 1px rgba(255,255,255,.7);
+  transition: transform .18s cubic-bezier(.3,1.4,.5,1);
+}
+.rocker.on { background: linear-gradient(180deg, #0c5e2b, #18a64c); box-shadow: inset 0 0 10px rgba(40,230,120,.5); }
+.rocker.on > .knob { transform: translateX(28px); }
+
+/* =========================================================================
+   ANALOG DIAL / GAUGE
+   ========================================================================= */
+.dial {
+  position: relative; border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #20242b 0%, #121418 70%, #0a0b0e 100%);
+  box-shadow: inset 0 4px 10px rgba(0,0,0,.8), inset 0 -2px 3px rgba(255,255,255,.05),
+    0 8px 20px rgba(0,0,0,.55);
+  border: 6px solid; border-image: linear-gradient(160deg, #4a4e55, #1a1c20) 1;
+}
+.dial-needle {
+  position: absolute; left: 50%; bottom: 50%; transform-origin: 50% 100%;
+  width: 3px; border-radius: 2px;
+  background: linear-gradient(180deg, #ff5a3c, #b0241a);
+  box-shadow: 0 0 8px rgba(255,90,60,.7);
+}
+.dial-cap {
+  position: absolute; left: 50%; top: 50%; width: 16px; height: 16px;
+  transform: translate(-50%,-50%); border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c3c7cd, #3a3d43);
+  box-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+
+/* =========================================================================
+   LED INDICATORS
+   ========================================================================= */
+.led { width: 13px; height: 13px; border-radius: 50%; flex: none;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.5), 0 1px 2px rgba(0,0,0,.6); }
+.led-green { background: radial-gradient(circle at 35% 30%, #b6ffce, #19c258 60%, #0a6e30);
+  box-shadow: 0 0 10px 1px rgba(40,230,120,.8), inset 0 1px 1px rgba(255,255,255,.6); }
+.led-amber { background: radial-gradient(circle at 35% 30%, #ffe7a8, #ffb000 60%, #a06a00);
+  box-shadow: 0 0 10px 1px rgba(255,176,0,.8), inset 0 1px 1px rgba(255,255,255,.6); }
+.led-red { background: radial-gradient(circle at 35% 30%, #ffc2c2, #e23b3b 60%, #8a1414);
+  box-shadow: 0 0 10px 1px rgba(230,60,60,.8), inset 0 1px 1px rgba(255,255,255,.6); }
+.led-off { background: radial-gradient(circle at 35% 30%, #3a3d43, #1a1c20); box-shadow: inset 0 1px 2px rgba(0,0,0,.8); }
+
+/* =========================================================================
+   PAPER CHALLAN + RUBBER STAMP + POLAROID + PAPERCLIP
+   ========================================================================= */
+.paper {
+  position: relative; color: #2a2118; font-family: 'Special Elite', monospace;
+  background:
+    repeating-linear-gradient(0deg, rgba(120,90,60,.05) 0 27px, rgba(120,90,60,.12) 27px 28px),
+    linear-gradient(180deg, #f4ecda 0%, #e9dcc2 100%);
+  box-shadow: 0 2px 2px rgba(0,0,0,.2), 0 16px 34px rgba(0,0,0,.5), inset 0 0 60px rgba(150,110,70,.12);
+  border: 1px solid #cdbb98;
+}
+.paper::after { /* paper fibre grain */
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background-image: var(--noise); opacity: .06; mix-blend-mode: multiply;
+}
+.perforated-top { -webkit-mask: radial-gradient(7px at 50% 0, transparent 96%, #000) 0 0/18px 100%; }
+
+.ink-stamp {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  color: #9b1c1c; border: 3px solid #9b1c1c; border-radius: 8px;
+  padding: 6px 12px; transform: rotate(-9deg); opacity: .9; letter-spacing: .08em;
+  box-shadow: inset 0 0 0 2px rgba(155,28,28,.25); mix-blend-mode: multiply;
+  text-shadow: 0 0 1px rgba(155,28,28,.4);
+}
+.ink-stamp::after {
+  content: ""; position: absolute; inset: 0; background-image: var(--noise);
+  opacity: .35; mix-blend-mode: screen; border-radius: 6px;
+}
+.ink-blue { color: #1e3a5f; border-color: #1e3a5f; }
+
+.polaroid {
+  background: linear-gradient(180deg, #fff 0%, #f0eee6 100%);
+  padding: 10px 10px 34px; border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.3), 0 14px 30px rgba(0,0,0,.45);
+}
+.polaroid .photo { background: #0b0d10; border-radius: 1px; overflow: hidden; }
+.paperclip {
+  position: absolute; width: 22px; height: 52px; border-radius: 11px;
+  border: 3px solid #b9bdc4; border-bottom: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,.5), inset 0 0 2px rgba(255,255,255,.6);
+}
+
+/* =========================================================================
+   EMBOSSED NUMBER PLATE
+   ========================================================================= */
+.plate-ind {
+  font-family: 'Share Tech Mono', monospace; letter-spacing: .12em; font-weight: 700;
+  color: #15171b; background: linear-gradient(180deg, #fbe26a 0%, #f4c20d 100%);
+  border: 2px solid #1b1d20; border-radius: 6px; padding: 4px 12px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -3px 5px rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.5);
+  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+.plate-emboss {
+  font-family: 'Oswald', sans-serif; letter-spacing: .35em; font-weight: 700;
+  color: #cfd3da; text-shadow: 0 1px 0 rgba(0,0,0,.7), 0 -1px 0 rgba(255,255,255,.12);
+}
+
+/* =========================================================================
+   FLIP-CLOCK DIGIT (mechanical counters)
+   ========================================================================= */
+.flip {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 42px; padding: 8px 4px; border-radius: 6px;
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 2rem; line-height: 1;
+  color: #f1f3f6;
+  background: linear-gradient(180deg, #2b2f36 0%, #14161a 49%, #0d0f12 51%, #1b1e23 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 10px rgba(0,0,0,.55);
+  border: 1px solid #07080a;
+}
+.flip::after { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 1px;
+  background: rgba(0,0,0,.7); }
+
+/* Engraved / etched label text. */
+.etched { color: #cfa75a; text-shadow: 0 1px 0 rgba(0,0,0,.6); }
+.engrave-dark { color: #d8c39a; text-shadow: 0 -1px 0 rgba(0,0,0,.6), 0 1px 0 rgba(255,220,160,.15); }
+
+/* Glowing bounding box for evidence review. */
+.bbox {
+  position: absolute; border: 2px solid; border-radius: 2px; pointer-events: none;
+  box-shadow: 0 0 12px currentColor, inset 0 0 12px rgba(255,255,255,.08);
+}
+.bbox > .bbox-tag {
+  position: absolute; top: -22px; left: -2px; font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 1px 6px; border-radius: 3px 3px 3px 0;
+  background: currentColor; white-space: nowrap;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "east",
+  "frame_size": [
+    1280,
+    720
+  ],
+  "no_parking": [],
+  "lanes": [],
+  "stop_line": null,
+  "light_roi": null,
+  "signal_cycle": null
+}

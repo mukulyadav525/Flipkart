@@ -1,0 +1,66 @@
+[
+  {
+    "id": "rq_001",
+    "status": "pending",
+    "violation_record": {
+      "image_id": "frame_0189",
+      "violation_type": "helmet",
+      "confidence": 0.72,
+      "rule_trace": "Bike detected (conf=0.72) at bbox(305,140,540,460). Head keypoints visible at approx (405,162). No helmet-class detection overlapping head region. Confidence below auto-process cutoff (0.85) — queued for human review.",
+      "related_detection_ids": ["frame_0189:bike:305,140"],
+      "related_plate_text": "MH04XY7890"
+    },
+    "annotated_image_path": "outputs/annotated_images/frame_0189_helmet.jpg",
+    "timestamp": "2025-06-18T10:14:38+05:30",
+    "plate_text": "MH04XY7890",
+    "plate_confidence": 0.78
+  },
+  {
+    "id": "rq_002",
+    "status": "pending",
+    "violation_record": {
+      "image_id": "frame_0244",
+      "violation_type": "wrong_side",
+      "confidence": 0.68,
+      "rule_trace": "Vehicle detected travelling against lane_direction_vector (0.0,-1.0). Displacement vector over 3 frames: (0.2,0.8) — dot product with legal direction is -0.8, indicating opposing travel. Confidence below auto-process cutoff — queued for human review.",
+      "related_detection_ids": ["frame_0244:car:160,200"],
+      "related_plate_text": "RJ14GH2233"
+    },
+    "annotated_image_path": "outputs/annotated_images/frame_0244_wrong_side.jpg",
+    "timestamp": "2025-06-18T06:58:12+05:30",
+    "plate_text": "RJ14GH2233",
+    "plate_confidence": 0.71
+  },
+  {
+    "id": "rq_003",
+    "status": "pending",
+    "violation_record": {
+      "image_id": "frame_0278",
+      "violation_type": "triple_riding",
+      "confidence": 0.74,
+      "rule_trace": "Bike detected (conf=0.74) at bbox(90,110,380,440). 3 person detections overlap the bike bbox by >=35%. One detection (conf=0.52) is borderline — may be a pedestrian adjacent to the vehicle rather than a rider. Confidence below auto-process cutoff — queued for human review.",
+      "related_detection_ids": ["frame_0278:bike:90,110", "frame_0278:pedestrian:100,130", "frame_0278:pedestrian:130,130", "frame_0278:pedestrian:360,220"],
+      "related_plate_text": "GJ01KL4455"
+    },
+    "annotated_image_path": "outputs/annotated_images/frame_0278_triple_riding.jpg",
+    "timestamp": "2025-06-18T12:33:47+05:30",
+    "plate_text": "GJ01KL4455",
+    "plate_confidence": 0.81
+  },
+  {
+    "id": "rq_004",
+    "status": "pending",
+    "violation_record": {
+      "image_id": "frame_0302",
+      "violation_type": "seatbelt",
+      "confidence": 0.71,
+      "rule_trace": "Car detected (conf=0.88) at bbox(40,60,520,360). Occupant detected (conf=0.81) with 44% overlap inside car. Torso keypoints partially occluded — left shoulder not visible. No seatbelt detection at partial torso region. Confidence below auto-process cutoff — queued for human review.",
+      "related_detection_ids": ["frame_0302:car:40,60", "frame_0302:pedestrian:90,70"],
+      "related_plate_text": "DL3CAB8877"
+    },
+    "annotated_image_path": "outputs/annotated_images/frame_0302_seatbelt.jpg",
+    "timestamp": "2025-06-18T14:51:09+05:30",
+    "plate_text": "DL3CAB8877",
+    "plate_confidence": 0.75
+  }
+]

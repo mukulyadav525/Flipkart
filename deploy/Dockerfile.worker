@@ -1,0 +1,23 @@
+# TrafficEye Pipeline worker (CV/ML) — large image.
+# For GPU, base on an NVIDIA CUDA + torch image and install the matching torch
+# build first. This CPU variant runs anywhere but is slower.
+FROM python:3.12-slim
+
+# OpenCV runtime libs
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgl1 libglib2.0-0 ffmpeg && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/Pipeline
+COPY Pipeline/requirements.txt ./requirements.txt
+# Use the headless OpenCV build inside a container (no display).
+RUN sed -i 's/opencv-python>/opencv-python-headless>/' requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY Pipeline /app/Pipeline
+ENV PYTHONPATH=/app/Pipeline:/app/Pipeline/src \
+    PYTHONUNBUFFERED=1
+
+# Override at runtime, e.g.:
+#   --camera configs/cameras/<name>.json   or   --source rtsp://...
+ENTRYPOINT ["python", "scripts/run_stream.py"]
+CMD ["--help"]

@@ -1,0 +1,26 @@
+{
+  "name": "South",
+  "source": "../traffic-video-dataset/Vodra/South.mp4",
+  "stride": 6,
+  "detector_weights": "weights/yolov8_idd.pt",
+  "pose_weights": "weights/yolov8n-pose.pt",
+
+  "_comment": "Calibration for the Vodra 'South' junction camera (1280x720). Geometry ported from gridlock/configs/cameras/South.json. Legal traffic flows left (lane vector). The curb on the right is a no-parking zone. No painted stop line / signal head is visible in this view, so stop_line/red_light stay off (correct).",
+
+  "lane_direction_vector": { "x": -1.0, "y": 0.12 },
+  "lane_zone_polygon": [
+    { "x": 330.0, "y": 450.0 },
+    { "x": 880.0, "y": 450.0 },
+    { "x": 930.0, "y": 665.0 },
+    { "x": 290.0, "y": 665.0 }
+  ],
+  "no_parking_zone_polygon": [
+    { "x": 820.0, "y": 360.0 },
+    { "x": 1180.0, "y": 360.0 },
+    { "x": 1220.0, "y": 620.0 },
+    { "x": 780.0,  "y": 620.0 }
+  ],
+  "stop_line_coords": null,
+  "signal_state": null,
+  "no_parking_sign_visible": false
+}

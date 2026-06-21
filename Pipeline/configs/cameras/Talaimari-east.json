@@ -1,0 +1,15 @@
+{
+  "name": "Talaimari-east",
+  "source": "../traffic-video-dataset/Talaimari/east.mp4",
+  "stride": 6,
+  "detector_weights": "weights/yolov8_idd.pt",
+  "pose_weights": "weights/yolov8n-pose.pt",
+
+  "_comment": "Talaimari 'east' junction (1280x720). No on-site calibration yet, so only the appearance-based rules run here: helmet, seatbelt, triple-riding + ANPR. Add stop_line_coords / lane_direction_vector / no_parking_zone_polygon (drawn on a still from this camera) to enable the geometry rules.",
+
+  "lane_direction_vector": null,
+  "no_parking_zone_polygon": null,
+  "stop_line_coords": null,
+  "signal_state": null,
+  "no_parking_sign_visible": false
+}

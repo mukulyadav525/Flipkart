@@ -1,0 +1,9 @@
+{
+  "name": "20230707_17_CY23_T1_Camera1_0",
+  "frame_size": [1920, 1080],
+  "no_parking": [],
+  "lanes": [],
+  "stop_line": { "p1": [1400, 270], "p2": [1400, 400] },
+  "light_roi": null,
+  "signal_cycle": [["green", 10], ["red", 30], ["green", 30], ["red", 20]]
+}

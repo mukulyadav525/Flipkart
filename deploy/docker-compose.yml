@@ -1,0 +1,51 @@
+# TrafficEye — backend + frontend.
+# Run from the repo root:  docker compose -f deploy/docker-compose.yml up --build
+#
+# The pipeline worker (run_stream.py) runs on the edge/GPU host and writes into
+# the shared ./Pipeline/outputs volume below; the backend serves whatever is
+# there. An optional GPU worker service is sketched at the bottom.
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      PIPELINE_ROOT: /app/Pipeline
+    volumes:
+      # share the pipeline outputs so the backend serves live results
+      - ../Pipeline/outputs:/app/Pipeline/outputs:ro
+      - backend_audit:/app/Backend/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # --- optional GPU pipeline worker (large image; uncomment to use) ----------
+  # worker:
+  #   build:
+  #     context: ..
+  #     dockerfile: deploy/Dockerfile.worker
+  #   command: >
+  #     python scripts/run_stream.py
+  #     --camera configs/cameras/demo.json --reset --device cuda
+  #   volumes:
+  #     - ../Pipeline/outputs:/app/Pipeline/outputs
+  #     - ../Pipeline/weights:/app/Pipeline/weights
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices: [{ capabilities: ["gpu"] }]
+  #   restart: unless-stopped
+
+volumes:
+  backend_audit:
