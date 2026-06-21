@@ -50,6 +50,13 @@ Pipeline/outputs/human_review_queue.jsonl
 Pipeline/outputs/latency_log.jsonl
 Pipeline/outputs/reports/*.json
 Pipeline/outputs/reports/*.csv
+Pipeline/outputs/plates/
+
+# ── Gridlock engine generated outputs & training runs (large) ────────────────
+Pipeline/gridlock/outputs/
+Pipeline/gridlock/runs/
+Pipeline/gridlock/runs_helmet/
+Pipeline/gridlock/runs_helmet2/
 
 # ── Test / coverage artefacts ─────────────────────────────────────────────────
 .pytest_cache/

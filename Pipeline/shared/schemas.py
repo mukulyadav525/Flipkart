@@ -29,7 +29,9 @@ class Point2D:
 
 class VehicleClass(str, Enum):
     car = "car"
-    bike = "bike"
+    bike = "bike"          # motorcycle / scooter (helmet law applies)
+    bicycle = "bicycle"    # pedal cycle / cycle-rickshaw (no helmet requirement)
+    auto = "auto"          # three-wheeler / autorickshaw
     bus = "bus"
     truck = "truck"
     pedestrian = "pedestrian"

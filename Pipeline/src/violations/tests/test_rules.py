@@ -112,49 +112,60 @@ def _torso_region_detection(x1=170, y1=160, x2=230, y2=335) -> DetectionRecord:
 
 class TestHelmet:
 
-    def test_fires_when_no_helmet_detected(self):
-        kpts = _coco_keypoints_17()
-        results = check_helmet([_bike(keypoints=kpts)], helmet_detections=[])
+    def test_fires_when_nohelmet_head_on_bike(self):
+        # The helmet model reports a no-helmet head sitting on the two-wheeler.
+        nohelmet = _head_region_detection()
+        results = check_helmet([_bike()], nohelmet_detections=[nohelmet])
         assert len(results) == 1
         r = results[0]
         assert r.status == RuleStatus.fired
         assert r.violation is not None
         assert r.violation.violation_type == ViolationType.helmet
-        assert "No helmet-class detection" in r.violation.rule_trace
+        assert "NO-HELMET head" in r.violation.rule_trace
 
-    def test_clear_when_helmet_overlaps_head(self):
-        kpts = _coco_keypoints_17()
-        helmet_det = _head_region_detection()  # overlaps nose/ear/eye region
-        results = check_helmet([_bike(keypoints=kpts)], helmet_detections=[helmet_det])
+    def test_clear_when_helmet_head_on_bike(self):
+        helmet_det = _head_region_detection()  # head wearing a helmet, on the bike
+        results = check_helmet([_bike()], helmet_detections=[helmet_det])
         assert results[0].status == RuleStatus.clear
 
     def test_skipped_when_no_bikes(self):
-        results = check_helmet([_car()])
+        results = check_helmet([_car()], nohelmet_detections=[_head_region_detection()])
         assert len(results) == 1
         assert results[0].status == RuleStatus.skipped
 
-    def test_skipped_when_no_keypoints(self):
-        results = check_helmet([_bike(keypoints=None)])
+    def test_candidate_fires_when_no_verdict_and_fallback_enabled(self):
+        # With the opt-in fallback, a motorcycle with no verdict -> review candidate.
+        results = check_helmet([_bike()], assume_nohelmet_on_motorcycle=True)
+        assert results[0].status == RuleStatus.fired
+        assert results[0].violation.confidence <= 0.84
+
+    def test_no_verdict_skipped_by_default(self):
+        # Precise default: no helmet-model verdict -> skipped, never assumed.
+        results = check_helmet([_bike()])
         assert results[0].status == RuleStatus.skipped
 
-    def test_skipped_when_all_head_keypoints_occluded(self):
-        # All head keypoints at (0, 0) — treated as occluded
-        kpts = [Point2D(0.0, 0.0)] * 17
-        results = check_helmet([_bike(keypoints=kpts)])
+    def test_nohelmet_head_off_bike_not_model_confirmed(self):
+        # A bare head far from the bike must not produce a model-confirmed fire.
+        off = _head_region_detection(x1=900, y1=900, x2=960, y2=945)
+        results = check_helmet([_bike()], nohelmet_detections=[off],
+                               assume_nohelmet_on_motorcycle=False)
         assert results[0].status == RuleStatus.skipped
+
+    def test_below_threshold_does_not_fire(self):
+        faint = _head_region_detection()
+        faint.track_confidence = 0.2   # below helmet threshold
+        results = check_helmet([_bike()], nohelmet_detections=[faint])
+        assert results[0].status == RuleStatus.clear
 
     def test_rule_trace_populated(self):
-        kpts = _coco_keypoints_17()
-        results = check_helmet([_bike(keypoints=kpts)], helmet_detections=[])
+        results = check_helmet([_bike()], nohelmet_detections=[_head_region_detection()])
         assert results[0].status == RuleStatus.fired
         trace = results[0].violation.rule_trace
-        assert "Bike detected" in trace
-        assert "Head keypoints" in trace
+        assert "Motorcycle detected" in trace
         assert "helmet" in trace.lower()
 
     def test_related_detection_ids_populated(self):
-        kpts = _coco_keypoints_17()
-        results = check_helmet([_bike(keypoints=kpts)], helmet_detections=[])
+        results = check_helmet([_bike()], nohelmet_detections=[_head_region_detection()])
         assert len(results[0].violation.related_detection_ids) == 1
 
 

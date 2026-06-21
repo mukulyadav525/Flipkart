@@ -52,11 +52,22 @@ from shared.schemas import BBox, DetectionRecord, Point2D, VehicleClass
 # IDD uses fine-grained labels; we collapse them to our five classes.
 # ---------------------------------------------------------------------------
 _IDD_LABEL_MAP: dict[str, VehicleClass] = {
-    # two-wheelers
+    # motorised two-wheelers (helmet law applies)
     "motorcycle":    VehicleClass.bike,
-    "bicycle":       VehicleClass.bike,
-    "autorickshaw":  VehicleClass.bike,   # closest; violations module may refine
     "two wheeler":   VehicleClass.bike,
+    "scooter":       VehicleClass.bike,
+    # pedal cycles / cycle-rickshaws — no helmet requirement
+    "bicycle":       VehicleClass.bicycle,
+    "cycle":         VehicleClass.bicycle,
+    "cycle rickshaw": VehicleClass.bicycle,
+    # three-wheelers — their own class so helmet/triple-riding rules skip them
+    "autorickshaw":  VehicleClass.auto,
+    "auto rickshaw": VehicleClass.auto,
+    "auto-rickshaw": VehicleClass.auto,
+    "rickshaw":      VehicleClass.auto,
+    "three wheeler": VehicleClass.auto,
+    "three-wheeler": VehicleClass.auto,
+    "tuk tuk":       VehicleClass.auto,
     # four-wheelers
     "car":           VehicleClass.car,
     "sedan":         VehicleClass.car,
@@ -71,7 +82,7 @@ _IDD_LABEL_MAP: dict[str, VehicleClass] = {
     "pedestrian":    VehicleClass.pedestrian,
     # COCO fallback names (used when running pretrained COCO weights)
     "0":             VehicleClass.pedestrian,
-    "1":             VehicleClass.bike,
+    "1":             VehicleClass.bicycle,
     "2":             VehicleClass.car,
     "5":             VehicleClass.bus,
     "7":             VehicleClass.truck,
@@ -96,11 +107,22 @@ _POSE_CLASSES: frozenset[VehicleClass] = frozenset([
 # Default weight paths (relative to project root)
 DETECTOR_WEIGHTS: str = "weights/yolov8_idd.pt"
 POSE_WEIGHTS: str = "weights/yolov8n-pose.pt"
-COCO_FALLBACK_WEIGHTS: str = "yolov8n.pt"   # ultralytics auto-downloads
+# yolo11s (not yolov8n) — markedly better vehicle-type separation on this
+# footage: it boxes three-wheelers wide enough for the auto-reclassification to
+# catch them, while keeping genuine motorcycles narrow.
+COCO_FALLBACK_WEIGHTS: str = "yolo11s.pt"   # ultralytics auto-downloads
 
 # Confidence threshold for detection (separate from violation thresholds)
 DETECT_CONF_THRESHOLD: float = 0.35
 POSE_CONF_THRESHOLD: float = 0.35
+
+# Three-wheelers (autorickshaws) aren't a COCO class, so the fallback model
+# reports them as "motorcycle" -> bike.  A two-wheeler *with a rider* is clearly
+# taller than wide; an autorickshaw/e-rickshaw box is roughly square or wider.
+# Bike-mapped detections at/above this width:height ratio are reclassified as
+# `auto` so helmet / triple-riding rules (which target genuine two-wheelers) skip
+# them.  Calibrated on the Talaimari clip: rickshaw box w/h≈1.01, motorcycle≈0.64.
+AUTO_ASPECT_RATIO: float = 0.9
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +188,7 @@ def _map_label(raw_name: str, class_id: int) -> Optional[VehicleClass]:
         return label
     # Fall back to COCO numeric ID filtering
     if class_id in _COCO_KEEP_IDS:
-        coco_map = {0: VehicleClass.pedestrian, 1: VehicleClass.bike,
+        coco_map = {0: VehicleClass.pedestrian, 1: VehicleClass.bicycle,
                     2: VehicleClass.car, 3: VehicleClass.bike,
                     5: VehicleClass.bus, 7: VehicleClass.truck}
         return coco_map.get(class_id)
@@ -296,6 +318,14 @@ def detect(
             x2=float(xyxy[2]),
             y2=float(xyxy[3]),
         )
+
+        # Shape-based recovery of three-wheelers when the detector lacks an
+        # autorickshaw class (e.g. COCO fallback): a wide "bike" box is an auto.
+        if vehicle_class is VehicleClass.bike:
+            w = bbox.x2 - bbox.x1
+            h = bbox.y2 - bbox.y1
+            if h > 0 and (w / h) >= AUTO_ASPECT_RATIO:
+                vehicle_class = VehicleClass.auto
 
         keypoints: Optional[list[Point2D]] = None
         if run_pose and pose_model is not None and vehicle_class in _POSE_CLASSES:

@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 from shared.schemas import (
-    BBox, DetectionRecord, PlateRecord, ViolationRecord, ViolationType,
+    BBox, DetectionRecord, PlateRecord, VehicleClass, ViolationRecord, ViolationType,
 )
 from stream.scene import CameraConfig
 from tracking.tracker import IoUTracker, Track, detection_id, iou
@@ -122,6 +122,8 @@ class StreamProcessor:
         run_anpr: bool = True,
         device: str = "cpu",
         conf_threshold: float = 0.35,
+        helmet_weights: Optional[str] = None,
+        use_helmet_model: bool = True,
         reset: bool = False,
     ):
         self.camera = camera
@@ -130,6 +132,14 @@ class StreamProcessor:
         self.run_anpr = run_anpr
         self.device = device
         self.conf_threshold = conf_threshold
+        self.helmet_weights = helmet_weights
+        # Helmet violations come from a trained no-helmet head model, not a guess.
+        # Disabled automatically when no model file is available.
+        self.use_helmet_model = use_helmet_model
+        if self.use_helmet_model:
+            from detection.helmet import available as _helmet_available
+            if not _helmet_available(helmet_weights):
+                self.use_helmet_model = False
 
         self.ann_dir       = self.out / "annotated_images"
         self.confirmed_jsonl = self.out / "violation_records" / "confirmed.jsonl"
@@ -194,12 +204,31 @@ class StreamProcessor:
             if self._reader is None:
                 from plate_ocr import PlateReader
                 self._reader = PlateReader()
-            plates = read_plates(proc, dets, image_id=image_id, reader=self._reader)
+            plates = read_plates(proc, dets, image_id=image_id, reader=self._reader,
+                                 device=self.device)
             assign_plates_to_tracks(plates, pairs)
+
+        # Motorcycle-first helmet check: crop each detected motorcycle and run the
+        # helmet model on that region only. Excludes pedestrians/cyclists by
+        # construction, and upscales the rider's small head so it's detectable.
+        helmet_heads: list[DetectionRecord] = []
+        nohelmet_heads: list[DetectionRecord] = []
+        if self.use_helmet_model:
+            from detection.helmet import classify_riders
+            motorcycles = [d for d in dets if d.class_label == VehicleClass.bike]
+            helmet_heads, nohelmet_heads = classify_riders(
+                frame, motorcycles, image_id, weights=self.helmet_weights,
+                conf=0.3, device=self.device,
+            )
 
         # Violation rules (scene geometry + motion).
         scene = dataclasses.replace(self.camera.scene, image_id=image_id)
-        violations = evaluate_all(dets, scene, helmet_detections=[], motion=motion)
+        violations = evaluate_all(
+            dets, scene,
+            helmet_detections=helmet_heads,
+            nohelmet_detections=nohelmet_heads,
+            motion=motion,
+        )
 
         # De-duplicate per vehicle, then package evidence for the new ones.
         selected = filter_new_violations(violations, det_to_track)

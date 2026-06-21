@@ -14,7 +14,10 @@ class ViolationThresholds:
     """
     thresholds: dict[ViolationType, float] = field(
         default_factory=lambda: {
-            ViolationType.helmet:        0.6,
+            # Helmet is gated on the trained no-helmet head model's confidence.
+            # That model under-scores no-helmet heads on out-of-domain footage,
+            # so the floor is low (0.25); sub-0.85 still routes to human review.
+            ViolationType.helmet:        0.25,
             ViolationType.seatbelt:      0.6,
             ViolationType.triple_riding: 0.6,
             ViolationType.wrong_side:    0.6,

@@ -137,75 +137,78 @@ _HELMET_OVERLAP_THRESHOLD = 0.30
 _SAME_VEHICLE_IOU = 0.50
 
 
+def _head_on_bike(bike_bbox: BBox, head_bbox: BBox, x_pad: float = 0.3, up_factor: float = 1.0) -> bool:
+    """True when a head box's centre sits on/above a two-wheeler box.
+
+    Riders sit on top of the bike, so a rider head lies within the bike's
+    horizontal span (widened by x_pad) and from just above the box top down to
+    its bottom.  This filters out heads belonging to pedestrians beside the bike.
+    """
+    hx = (head_bbox.x1 + head_bbox.x2) / 2.0
+    hy = (head_bbox.y1 + head_bbox.y2) / 2.0
+    bw = bike_bbox.x2 - bike_bbox.x1
+    bh = bike_bbox.y2 - bike_bbox.y1
+    pad = bw * x_pad
+    if not (bike_bbox.x1 - pad <= hx <= bike_bbox.x2 + pad):
+        return False
+    return (bike_bbox.y1 - bh * up_factor) <= hy <= bike_bbox.y2
+
+
+# Proxy fires (no helmet-model evidence either way) are capped below the
+# auto-process cutoff so they always land in the human-review queue, never
+# auto-confirmed without an actual no-helmet detection.
+_HELMET_PROXY_CONF_CAP = 0.84
+
+
 def check_helmet(
     detections: list[DetectionRecord],
     *,
-    # "helmet" class detections come from a separate attribute classifier
-    # run over each crop; pass an empty list if that stage hasn't run yet.
     helmet_detections: list[DetectionRecord] | None = None,
+    nohelmet_detections: list[DetectionRecord] | None = None,
+    assume_nohelmet_on_motorcycle: bool = False,
 ) -> list[RuleResult]:
     """
-    For every bike detection that has head keypoints, verify a helmet detection
-    overlaps the head region.  Fire a violation if none does.
+    Hybrid helmet check — applies to motorcycles (``VehicleClass.bike``) only;
+    bicycles and three-wheelers are separate classes and never reach this rule.
+
+    Per motorcycle:
+      - a model-detected NO-HELMET head sits on it -> fired (conf = head conf)
+      - else a model-detected HELMET head sits on it -> clear
+      - else (helmet model gave no verdict):
+          * assume_nohelmet_on_motorcycle -> fired as a review candidate
+            (confidence capped < AUTO_PROCESS_CUTOFF, so a human confirms)
+          * otherwise -> skipped
+
+    The fallback exists because the trained helmet model under-detects no-helmet
+    heads on out-of-domain footage; scoping it to motorcycles keeps cyclists and
+    rickshaws clear while still surfacing real bare-headed riders for review.
 
     Parameters
     ----------
-    detections         : All DetectionRecords for the image.
-    helmet_detections  : Optional list of helmet-class detections from an
-                         attribute classifier.  If None or empty, the rule
-                         assumes no helmet is present (conservative).
+    detections          : All DetectionRecords for the image.
+    helmet_detections   : Heads the model classified as wearing a helmet.
+    nohelmet_detections : Heads the model classified as *not* wearing a helmet.
+    assume_nohelmet_on_motorcycle : enable the review-candidate fallback.
     """
     results: list[RuleResult] = []
     threshold = THRESHOLDS.get(ViolationType.helmet)
+    helmet_detections = helmet_detections or []
+    nohelmet_detections = nohelmet_detections or []
 
     bikes = [d for d in detections if d.class_label == VehicleClass.bike]
     if not bikes:
-        return [RuleResult(status=RuleStatus.skipped, reason="no bike detections in frame")]
+        return [RuleResult(status=RuleStatus.skipped, reason="no motorcycle detections in frame")]
 
     for bike in bikes:
-        if bike.pose_keypoints is None:
-            # Can't evaluate without keypoints — skip this bike, don't fire
-            results.append(RuleResult(
-                status=RuleStatus.skipped,
-                reason=f"bike at ({bike.bbox.x1:.0f},{bike.bbox.y1:.0f}) has no pose keypoints",
-            ))
-            continue
-
-        head_bbox = _keypoint_bbox(bike.pose_keypoints, _HEAD_KP_INDICES, padding=15.0)
-        if head_bbox is None:
-            results.append(RuleResult(
-                status=RuleStatus.skipped,
-                reason=f"bike at ({bike.bbox.x1:.0f},{bike.bbox.y1:.0f}): "
-                       "all head keypoints occluded (0,0) — cannot assess helmet",
-            ))
-            continue
-
-        # Check whether any helmet detection overlaps the head region
-        helmet_found = False
-        if helmet_detections:
-            for h in helmet_detections:
-                if _overlap_ratio(h.bbox, head_bbox) >= _HELMET_OVERLAP_THRESHOLD:
-                    helmet_found = True
-                    break
-
-        if helmet_found:
-            results.append(RuleResult(
-                status=RuleStatus.clear,
-                reason=f"helmet detected overlapping head region of bike "
-                       f"at ({bike.bbox.x1:.0f},{bike.bbox.y1:.0f})",
-            ))
-        else:
-            # Violation confidence is the bike's detection confidence, capped
-            # at 1.0, because certainty that this is a bike is the main
-            # source of uncertainty — we conservatively assume no helmet.
-            conf = min(bike.track_confidence, 1.0)
+        nh = next((h for h in nohelmet_detections if _head_on_bike(bike.bbox, h.bbox)), None)
+        if nh is not None:
+            conf = min(nh.track_confidence, 1.0)
             if conf < threshold:
                 results.append(RuleResult(
                     status=RuleStatus.clear,
-                    reason=f"bike conf {conf:.2f} below helmet threshold {threshold:.2f} — skipped",
+                    reason=f"no-helmet head conf {conf:.2f} below threshold {threshold:.2f} — skipped",
                 ))
                 continue
-
             results.append(RuleResult(
                 status=RuleStatus.fired,
                 violation=ViolationRecord(
@@ -213,19 +216,59 @@ def check_helmet(
                     violation_type=ViolationType.helmet,
                     confidence=conf,
                     rule_trace=(
-                        f"Bike detected (conf={bike.track_confidence:.2f}) at "
-                        f"bbox=({bike.bbox.x1:.0f},{bike.bbox.y1:.0f},"
+                        f"Motorcycle detected at bbox=({bike.bbox.x1:.0f},{bike.bbox.y1:.0f},"
                         f"{bike.bbox.x2:.0f},{bike.bbox.y2:.0f}). "
-                        f"Head keypoints visible at approx "
-                        f"({head_bbox.x1+15:.0f},{head_bbox.y1+15:.0f}). "
-                        f"No helmet-class detection overlaps head region "
-                        f"(overlap threshold={_HELMET_OVERLAP_THRESHOLD}). "
-                        f"Rule: helmet must be present within {_HELMET_OVERLAP_THRESHOLD*100:.0f}% "
-                        f"overlap of head keypoint bounding box."
+                        f"Helmet model detected a NO-HELMET head (conf={conf:.2f}) at "
+                        f"({nh.bbox.x1:.0f},{nh.bbox.y1:.0f}) on the rider. "
+                        f"Rule: a rider on a motorcycle must wear a helmet."
                     ),
                     related_detection_ids=[_detection_id(bike)],
                 ),
             ))
+            continue
+
+        hh = next((h for h in helmet_detections if _head_on_bike(bike.bbox, h.bbox)), None)
+        if hh is not None:
+            results.append(RuleResult(
+                status=RuleStatus.clear,
+                reason=f"helmet head detected on rider of motorcycle at "
+                       f"({bike.bbox.x1:.0f},{bike.bbox.y1:.0f})",
+            ))
+            continue
+
+        # No helmet-model verdict for this motorcycle.
+        if not assume_nohelmet_on_motorcycle:
+            results.append(RuleResult(
+                status=RuleStatus.skipped,
+                reason=f"motorcycle at ({bike.bbox.x1:.0f},{bike.bbox.y1:.0f}): "
+                       "no helmet-model verdict — cannot assess",
+            ))
+            continue
+
+        conf = min(bike.track_confidence, _HELMET_PROXY_CONF_CAP)
+        if conf < threshold:
+            results.append(RuleResult(
+                status=RuleStatus.clear,
+                reason=f"motorcycle conf {conf:.2f} below threshold {threshold:.2f} — skipped",
+            ))
+            continue
+        results.append(RuleResult(
+            status=RuleStatus.fired,
+            violation=ViolationRecord(
+                image_id=bike.image_id,
+                violation_type=ViolationType.helmet,
+                confidence=conf,
+                rule_trace=(
+                    f"Motorcycle detected (conf={bike.track_confidence:.2f}) at "
+                    f"bbox=({bike.bbox.x1:.0f},{bike.bbox.y1:.0f},"
+                    f"{bike.bbox.x2:.0f},{bike.bbox.y2:.0f}). "
+                    f"Helmet model gave no helmet/no-helmet verdict for the rider; "
+                    f"flagged as a REVIEW CANDIDATE (confidence capped at "
+                    f"{_HELMET_PROXY_CONF_CAP}). A human reviewer confirms before action."
+                ),
+                related_detection_ids=[_detection_id(bike)],
+            ),
+        ))
 
     return results
 
@@ -434,6 +477,7 @@ def check_triple_riding(detections: list[DetectionRecord]) -> list[RuleResult]:
 # Vehicle classes that can commit road-position violations (people excluded).
 _VEHICLE_CLASSES: frozenset[VehicleClass] = frozenset({
     VehicleClass.car, VehicleClass.bus, VehicleClass.truck, VehicleClass.bike,
+    VehicleClass.auto, VehicleClass.bicycle,
 })
 
 # A point must be at least this many pixels past the stop line (in the travel
@@ -910,6 +954,7 @@ def evaluate_all(
     scene: Optional[SceneContext] = None,
     *,
     helmet_detections: list[DetectionRecord] | None = None,
+    nohelmet_detections: list[DetectionRecord] | None = None,
     seatbelt_detections: list[DetectionRecord] | None = None,
     motion: Optional[dict[str, Point2D]] = None,
 ) -> list[ViolationRecord]:
@@ -937,7 +982,8 @@ def evaluate_all(
             if r.status == RuleStatus.fired and r.violation is not None:
                 violations.append(r.violation)
 
-    _collect(check_helmet(detections, helmet_detections=helmet_detections))
+    _collect(check_helmet(detections, helmet_detections=helmet_detections,
+                          nohelmet_detections=nohelmet_detections))
     _collect(check_seatbelt(detections, seatbelt_detections=seatbelt_detections))
     _collect(check_triple_riding(detections))
 

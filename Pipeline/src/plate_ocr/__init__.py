@@ -259,7 +259,7 @@ class PlateReader:
     the first ``read_plates`` call so importing this module stays cheap.
     """
 
-    def __init__(self, langs: Sequence[str] = ("en",), gpu: bool = False,
+    def __init__(self, langs: Sequence[str] = ("en", "bn"), gpu: bool = False,
                  min_conf: float = MIN_OCR_CONF):
         self.langs = list(langs)
         self.gpu = gpu
@@ -295,6 +295,40 @@ class PlateReader:
         for box, text, conf in self._reader.readtext(region):
             out.append((text, float(conf), box))
         return out
+
+    def read_box(self, image, plate_bbox: BBox) -> tuple[str, float]:  # pragma: no cover
+        """
+        OCR a pre-localised plate box (e.g. from the YOLO plate detector) and
+        return ``(text, confidence)``.  Keeps the highest-confidence reading;
+        prefers a normalised Indian-format match when one is present, otherwise
+        returns the raw text (so Bengali plates still surface). ``("", 0.0)`` when
+        nothing is read.
+        """
+        if not self.available:
+            return "", 0.0
+        H, W = image.shape[:2]
+        x1 = max(0, int(plate_bbox.x1)); y1 = max(0, int(plate_bbox.y1))
+        x2 = min(W, int(plate_bbox.x2)); y2 = min(H, int(plate_bbox.y2))
+        crop = image[y1:y2, x1:x2]
+        if crop.size == 0:
+            return "", 0.0
+
+        best_text, best_conf, best_score = "", 0.0, -1.0
+        for raw_text, conf, _ in self._ocr_region(crop):
+            if conf < self.min_conf:
+                continue
+            norm = normalize_plate(raw_text)
+            # Score normalised Indian-format readings; fall back to raw conf so
+            # non-Latin (Bengali) text is still kept as a detection.
+            score = score_reading(norm, conf) if norm else conf * 0.5
+            display = raw_text.strip()
+            if norm and is_acceptable_plate(norm):
+                coerced = coerce_to_format(norm)
+                display = coerced if (is_valid_indian_plate(coerced)
+                                      and not is_valid_indian_plate(norm)) else norm
+            if score > best_score:
+                best_text, best_conf, best_score = display, conf, score
+        return best_text, round(float(best_conf), 4)
 
     def read_vehicle(self, image, vehicle_bbox: BBox) -> Optional[PlateRecord]:  # pragma: no cover
         """OCR a single vehicle and return its best PlateRecord, or None."""
@@ -369,38 +403,64 @@ def read_plates(
     *,
     image_id: Optional[str] = None,
     reader: Optional[PlateReader] = None,
+    plate_weights: Optional[str] = None,
+    device: str = "cpu",
 ) -> list[PlateRecord]:
     """
-    Read one plate per plate-bearing vehicle detection.
+    Detect and read licence plates for the plate-bearing vehicles in a frame.
+
+    Localisation is detection-first:
+      * If a trained YOLO plate model is available, each detected plate box is
+        emitted as a PlateRecord — with OCR text when readable, or empty text
+        (box only) when it isn't.  This is the "license-plate detection system".
+      * Otherwise it falls back to the classic-CV localiser + OCR, which only
+        emits a record when text is actually read (no speculative boxes).
 
     Parameters
     ----------
-    image       : BGR uint8 frame (numpy array).
-    detections  : DetectionRecords for this frame (from detect.py).
-    image_id    : Overrides the image_id stamped on each PlateRecord;
-                  defaults to the detections' own image_id.
-    reader      : Optional shared PlateReader (reuse to avoid reloading OCR).
+    image         : BGR uint8 frame (numpy array).
+    detections    : DetectionRecords for this frame (from detect.py).
+    image_id      : Overrides the image_id stamped on each PlateRecord.
+    reader        : Optional shared PlateReader (reuse to avoid reloading OCR).
+    plate_weights : Optional override for the YOLO plate-model path.
+    device        : Inference device for the plate detector.
 
     Returns
     -------
-    list[PlateRecord]
-        One per vehicle a plate could be read for.  Empty when EasyOCR / cv2 are
-        unavailable or no plate was legible — never raises.
+    list[PlateRecord]   (never raises)
     """
+    from detection import plate as plate_det
+
     rdr = reader or _get_reader()
-    if not rdr.available:
-        print("[plate_ocr] EasyOCR/cv2 unavailable — skipping ANPR "
-              "(pip install easyocr opencv-python).", file=sys.stderr)
+    use_yolo = plate_det.available(plate_weights)
+
+    if not use_yolo and not rdr.available:
+        print("[plate_ocr] No plate model and EasyOCR/cv2 unavailable — skipping "
+              "ANPR (add Pipeline/weights/plate.pt or pip install easyocr).",
+              file=sys.stderr)
         return []
 
     plates: list[PlateRecord] = []
     for det in detections:
         if det.class_label not in PLATE_BEARING_CLASSES:
             continue
-        rec = rdr.read_vehicle(image, det.bbox)
-        if rec is not None:
-            rec.image_id = image_id or det.image_id
-            plates.append(rec)
+        iid = image_id or det.image_id
+
+        if use_yolo:
+            # Detection-first: localise with the YOLO plate model, OCR best-effort.
+            for pb in plate_det.detect_plate_in_vehicle(
+                image, det.bbox, weights=plate_weights, device=device,
+            ):
+                text, conf = rdr.read_box(image, pb) if rdr.available else ("", 0.0)
+                plates.append(PlateRecord(
+                    image_id=iid, vehicle_bbox=det.bbox, plate_bbox=pb,
+                    plate_text=text, ocr_confidence=conf,
+                ))
+        else:
+            rec = rdr.read_vehicle(image, det.bbox)
+            if rec is not None:
+                rec.image_id = iid
+                plates.append(rec)
     return plates
 
 

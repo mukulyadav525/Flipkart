@@ -53,6 +53,11 @@ def main() -> None:
     ap.add_argument("--device", default="cpu", help="cpu / cuda / mps (default cpu)")
     ap.add_argument("--conf", type=float, default=0.35, help="Detection confidence threshold")
     ap.add_argument("--weights", default=None, help="Override detector weights path")
+    ap.add_argument("--helmet-weights", default=None,
+                    help="Trained helmet model (helmet/no_helmet heads). "
+                         "Auto-found under weights/ or gridlock/runs_helmet* if omitted.")
+    ap.add_argument("--no-helmet-model", action="store_true",
+                    help="Disable the helmet model (no helmet violations will fire)")
     args = ap.parse_args()
 
     if args.camera:
@@ -77,8 +82,13 @@ def main() -> None:
         run_anpr=not args.no_anpr,
         device=args.device,
         conf_threshold=args.conf,
+        helmet_weights=args.helmet_weights,
+        use_helmet_model=not args.no_helmet_model,
         reset=args.reset,
     )
+    if not proc.use_helmet_model and not args.no_helmet_model:
+        print("[stream] WARNING: no trained helmet model found — helmet violations "
+              "are OFF. Pass --helmet-weights or drop one in Pipeline/weights/helmet.pt")
     proc.run(max_frames=args.max_frames)
 
 
