@@ -1,0 +1,10 @@
+# Corrected paths for the Roboflow "motorcycle-helmet-bbi64" v1 export.
+# Roboflow's bundled data.yaml uses ../ relative paths that don't resolve;
+# this points Ultralytics at absolute locations instead.
+path: /Users/dakshsingh/gridlock/archive/motorcycle helmet.v1i.yolov11
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 3
+names: ['With Helmet', 'Without Helmet', 'helmet']

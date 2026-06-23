@@ -1,0 +1,18 @@
+# Core CV + numerics (required for the image/stream pipeline)
+numpy>=1.26
+opencv-python>=4.9          # use opencv-python-headless on servers without a display
+
+# Detection + pose (Task 2). Auto-downloads COCO weights when weights/ is empty.
+ultralytics>=8.2
+
+# License-plate OCR (Task 5). Optional but recommended; the pipeline degrades
+# gracefully (plates left blank) if it is not installed.
+easyocr>=1.7
+
+# Notes
+# -----
+# * For GPU inference install the matching torch build first (see pytorch.org),
+#   then `pip install -r requirements.txt`.
+# * Pure-logic modules (violation rules, analytics, evaluation, plate-text
+#   helpers, tracker, scene loader) need none of the above and are unit-tested
+#   with just `pytest`.

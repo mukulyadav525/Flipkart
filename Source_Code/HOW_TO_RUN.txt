@@ -1,0 +1,71 @@
+TrafficEye Source Code - How to Run
+===================================
+
+This folder contains only the source code, dependency files, small configs, and
+mock/demo JSON needed to run the project. It does not include installed
+dependencies, virtual environments, generated pipeline outputs, model weights,
+training runs, or videos.
+
+
+1. Run the backend API
+----------------------
+
+Open a terminal:
+
+cd Source_Code/Backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+
+The backend runs at:
+
+http://localhost:8000
+
+If Pipeline outputs are not present, the backend automatically uses the files in
+Backend/mock_data.
+
+
+2. Run the frontend portal
+--------------------------
+
+Open a second terminal:
+
+cd Source_Code/Frontend
+npm install
+npm run dev
+
+The frontend runs at:
+
+http://localhost:5173
+
+Frontend/.env.local sets VITE_USE_MOCK=false, so the frontend calls the backend
+through the Vite proxy configured in Frontend/vite.config.ts.
+
+
+3. Optional: run the pipeline to generate real portal data
+---------------------------------------------------------
+
+Open a third terminal:
+
+cd Source_Code/Pipeline
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+Then run the portal pipeline with your own video and model files. Example:
+
+python scripts/run_portal_pipeline.py gridlock/archive/Vodra/South.mp4 \
+  --config gridlock/configs/cameras/South.json \
+  --helmet-weights gridlock/models/helmet.pt --anpr
+
+This writes portal-readable outputs under Pipeline/outputs. The backend will use
+those outputs automatically when they exist.
+
+Notes:
+- Videos, YOLO weights, generated outputs, and trained model files are not
+  included in this source-only folder.
+- For GPU inference, install the correct PyTorch build for your machine before
+  installing the pipeline requirements.
+- If you only want to demo the portal UI, you can skip the pipeline step and use
+  the included mock data.

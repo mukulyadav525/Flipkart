@@ -1,0 +1,23 @@
+{
+  "name": "demo",
+  "source": "samples/demo.mp4",
+  "stride": 2,
+  "detector_weights": "weights/yolov8_idd.pt",
+  "pose_weights": "weights/yolov8n-pose.pt",
+
+  "_comment": "Calibration for a fixed 1280x720 junction camera. Replace 'source' with your video file / rtsp url, and redraw the geometry below on a still frame from YOUR camera. signal_state can be a live feed in production; here it is fixed for the demo clip.",
+
+  "signal_state": "red",
+  "lane_direction_vector": { "x": 0.0, "y": -1.0 },
+  "stop_line_coords": [
+    { "x": 120.0, "y": 470.0 },
+    { "x": 1160.0, "y": 470.0 }
+  ],
+  "no_parking_zone_polygon": [
+    { "x": 60.0,  "y": 360.0 },
+    { "x": 300.0, "y": 360.0 },
+    { "x": 300.0, "y": 700.0 },
+    { "x": 60.0,  "y": 700.0 }
+  ],
+  "no_parking_sign_visible": false
+}
